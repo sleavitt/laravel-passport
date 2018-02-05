@@ -9,6 +9,7 @@ use Laravel\Passport\Events\AccessTokenCreated;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
+use Laravel\Passport\ClientRepository as PassportClientRepository;
 
 class AccessTokenRepository implements AccessTokenRepositoryInterface
 {
@@ -53,10 +54,12 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      */
     public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity)
     {
+        $clientId = (new PassportClientRepository)->find($accessTokenEntity->getClient()->getIdentifier())->getKey();
+
         $this->tokenRepository->create([
             'id' => $accessTokenEntity->getIdentifier(),
             'user_id' => $accessTokenEntity->getUserIdentifier(),
-            'client_id' => $accessTokenEntity->getClient()->getIdentifier(),
+            'client_id' => $clientId,
             'scopes' => $this->scopesToArray($accessTokenEntity->getScopes()),
             'revoked' => false,
             'created_at' => new DateTime,
@@ -67,7 +70,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
         $this->events->dispatch(new AccessTokenCreated(
             $accessTokenEntity->getIdentifier(),
             $accessTokenEntity->getUserIdentifier(),
-            $accessTokenEntity->getClient()->getIdentifier()
+            $clientId
         ));
     }
 

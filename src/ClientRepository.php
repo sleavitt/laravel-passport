@@ -12,7 +12,21 @@ class ClientRepository
      */
     public function find($id)
     {
-        return Client::find($id);
+        return $this->_find($id)
+                    ->first();
+    }
+
+    /**
+     * Return a Builder instance configured
+     * to search by id on the correct field.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function _find($id)
+    {
+        return Passport::$useClientUUIDs
+               ? Client::where('uuid', $id)
+               : Client::whereKey($id);
     }
 
     /**
@@ -37,9 +51,9 @@ class ClientRepository
      */
     public function findForUser($clientId, $userId)
     {
-        return Client::where('id', $clientId)
-                     ->where('user_id', $userId)
-                     ->first();
+        return $this->_find($clientId)
+                    ->where('user_id', $userId)
+                    ->first();
     }
 
     /**
@@ -51,7 +65,7 @@ class ClientRepository
     public function forUser($userId)
     {
         return Client::where('user_id', $userId)
-                        ->orderBy('name', 'asc')->get();
+                     ->orderBy('name', 'asc')->get();
     }
 
     /**

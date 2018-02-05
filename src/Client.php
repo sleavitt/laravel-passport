@@ -4,6 +4,8 @@ namespace Laravel\Passport;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Ramsey\Uuid\Uuid;
+
 class Client extends Model
 {
     /**
@@ -41,6 +43,13 @@ class Client extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['client_id'];
+
+    /**
      * Get all of the authentication codes for the client.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -68,5 +77,34 @@ class Client extends Model
     public function firstParty()
     {
         return $this->personal_access_client || $this->password_client;
+    }
+
+    /**
+     * Return public identifier for the client.
+     *
+     * @return int|uuid
+     */
+    public function getClientIdAttribute()
+    {
+        return Passport::$useClientUUIDs ? $this->uuid : $this->id;
+    }
+
+    /**
+     * Boot function from laravel.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::bootUuids();
+    }
+
+    protected static function bootUuids()
+    {
+        if (Passport::$useClientUUIDs) {
+            static::creating(function($model) {
+                $model->uuid = Uuid::uuid4()->toString();
+            });
+        }
     }
 }
