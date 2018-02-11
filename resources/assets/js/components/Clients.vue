@@ -59,7 +59,7 @@
                         <tr v-for="client in clients">
                             <!-- ID -->
                             <td style="vertical-align: middle;">
-                                {{ client.id }}
+                                {{ client.client_id }}
                             </td>
 
                             <!-- Name -->
@@ -384,7 +384,7 @@
              * Edit the given client.
              */
             edit(client) {
-                this.editForm.id = client.id;
+                this.editForm.id = client.client_id;
                 this.editForm.fields.name = client.name;
                 this.editForm.fields.redirect = client.redirect;
 
@@ -433,7 +433,7 @@
              * Destroy the given client.
              */
             destroy(client) {
-                axios.delete('/oauth/clients/' + client.id)
+                axios.delete('/oauth/clients/' + client.client_id)
                         .then(response => {
                             this.getClients();
                         });

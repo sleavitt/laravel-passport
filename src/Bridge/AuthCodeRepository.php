@@ -5,6 +5,7 @@ namespace Laravel\Passport\Bridge;
 use Illuminate\Database\Connection;
 use League\OAuth2\Server\Entities\AuthCodeEntityInterface;
 use League\OAuth2\Server\Repositories\AuthCodeRepositoryInterface;
+use Laravel\Passport\ClientRepository as PassportClientRepository;
 
 class AuthCodeRepository implements AuthCodeRepositoryInterface
 {
@@ -44,7 +45,7 @@ class AuthCodeRepository implements AuthCodeRepositoryInterface
         $this->database->table('oauth_auth_codes')->insert([
             'id' => $authCodeEntity->getIdentifier(),
             'user_id' => $authCodeEntity->getUserIdentifier(),
-            'client_id' => $authCodeEntity->getClient()->getIdentifier(),
+            'client_id' => (new PassportClientRepository)->find($authCodeEntity->getClient()->getIdentifier())->getKey(),
             'scopes' => $this->formatScopesForStorage($authCodeEntity->getScopes()),
             'revoked' => false,
             'expires_at' => $authCodeEntity->getExpiryDateTime(),
